@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const User = require("../models/user");
+const { InitiateDatabase } = require('../loaders/mongodb')
 
 router.get("/", (req, res) => {
   res.status(200).json({ msg: "/ Route checker" });
@@ -15,8 +16,14 @@ router.get("/login", (req, res) => {
 });
 
 router.post("/login", (req, res) => {
-  req.session.email = req.body.email;
-  res.end("logged in");
+  req.session.email = req.body.email
+  const db = InitiateDatabase()
+  db.collection("users").findOne({
+    email: req.session.email
+  })
+  .then((result) => {
+    res.end(`logged in with: ${result.email}`);
+  })
 });
 
 router.get("/register", (req, res) => {
@@ -47,11 +54,6 @@ router.get("/admin", (req, res) => {
   } else {
     res.end("Login first");
   }
-});
-
-router.post("/login", (req, res) => {
-  req.session.email = req.body.email;
-  res.end("logged in");
 });
 
 router.get("/admin", (req, res) => {
